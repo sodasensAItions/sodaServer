@@ -7,7 +7,7 @@ import com.sodasensaitions.backend.authentication.config.JwtService;
 import com.sodasensaitions.backend.authentication.token.Token;
 import com.sodasensaitions.backend.authentication.token.TokenRepository;
 import com.sodasensaitions.backend.authentication.user.Account;
-import com.sodasensaitions.backend.authentication.user.UserRepository;
+import com.sodasensaitions.backend.authentication.user.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-  private final UserRepository userRepository;
+  private final AccountRepository accountRepository;
   private final TokenRepository tokenRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
@@ -29,7 +29,7 @@ public class AuthenticationService {
 
   public AuthenticationResponse register(RegisterRequest request) {
 
-    Optional<Account> optional = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail());
+    Optional<Account> optional = accountRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail());
     if (optional.isPresent()) {
       return null;
     }
@@ -38,8 +38,10 @@ public class AuthenticationService {
         .email(request.getEmail())
         .password(passwordEncoder.encode(request.getPassword()))
         .username(request.getUsername())
+        .firstName(request.getFirstname())
+        .lastName(request.getLastname())
         .build();
-    var savedUser = userRepository.save(user);
+    var savedUser = accountRepository.save(user);
     var jwtToken = jwtService.generateToken(user);
     var refreshToken = jwtService.generateRefreshToken(user);
     saveUserToken(savedUser, jwtToken);
@@ -57,7 +59,7 @@ public class AuthenticationService {
             request.getPassword()
         )
     );
-    var user = userRepository.findByUsername(request.getUsername())
+    var user = accountRepository.findByUsername(request.getUsername())
         .orElse(null);
     if (user == null) {
       return null;

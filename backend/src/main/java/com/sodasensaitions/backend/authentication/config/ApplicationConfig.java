@@ -1,6 +1,6 @@
 package com.sodasensaitions.backend.authentication.config;
 
-import com.sodasensaitions.backend.authentication.user.UserRepository;
+import com.sodasensaitions.backend.authentication.user.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-  private final UserRepository repository;
+  private final AccountRepository repository;
 
   @Bean
   public UserDetailsService userDetailsService() {
