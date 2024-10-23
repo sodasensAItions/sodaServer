@@ -3,7 +3,7 @@ package com.sodasensaitions.backend.authentication.auth;
 import com.sodasensaitions.backend.authentication.auth.pojo.AuthenticationRequest;
 import com.sodasensaitions.backend.authentication.auth.pojo.AuthenticationResponse;
 import com.sodasensaitions.backend.authentication.auth.pojo.RegisterRequest;
-import com.sodasensaitions.backend.authentication.config.JwtService;
+import com.sodasensaitions.backend.authentication.token.JwtService;
 import com.sodasensaitions.backend.authentication.token.Token;
 import com.sodasensaitions.backend.authentication.token.TokenRepository;
 import com.sodasensaitions.backend.authentication.user.Account;

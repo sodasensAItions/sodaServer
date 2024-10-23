@@ -1,4 +1,4 @@
-package com.sodasensaitions.backend.authentication.config;
+package com.sodasensaitions.backend.authentication.auth;
 
 import com.sodasensaitions.backend.authentication.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;

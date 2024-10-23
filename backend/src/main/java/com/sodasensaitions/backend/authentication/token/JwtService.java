@@ -1,4 +1,4 @@
-package com.sodasensaitions.backend.authentication.config;
+package com.sodasensaitions.backend.authentication.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

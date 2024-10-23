@@ -1,6 +1,6 @@
 package com.sodasensaitions.backend.filters;
 
-import com.sodasensaitions.backend.authentication.config.JwtService;
+import com.sodasensaitions.backend.authentication.token.JwtService;
 import com.sodasensaitions.backend.authentication.token.TokenRepository;
 import com.sodasensaitions.backend.config.constants.HttpServletSessionConstants;
 import jakarta.servlet.FilterChain;
