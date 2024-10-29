@@ -1,14 +1,17 @@
 package com.sodasensaitions.backend.inventory;
 
-import java.util.Optional;
+import java.util.List;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class IngredientService {
     private final IngredientRepository ingredientRepository;
 
-    public Ingredient[] getAllAvailable() {
-        return ingredientRepository.getAllIngredients().orElse(null);
+    public List<Ingredient> getAllAvailable() {
+        return ingredientRepository.findAll();
     }
+
 }
