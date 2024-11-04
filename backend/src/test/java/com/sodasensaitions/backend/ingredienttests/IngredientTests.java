@@ -1,15 +1,11 @@
-package com.sodasensaitions.backend.inventorytests;
+package com.sodasensaitions.backend.ingredienttests;
 
 import com.google.gson.Gson;
 import com.sodasensaitions.backend.authentication.auth.pojo.AuthenticationResponse;
 import com.sodasensaitions.backend.authentication.user.Account;
-import com.sodasensaitions.backend.authentication.user.AccountRepository;
 import com.sodasensaitions.backend.inventory.Ingredient;
 import com.sodasensaitions.backend.inventory.IngredientRepository;
 import com.sodasensaitions.backend.utils.RegisteringUtils;
-
-import java.util.Arrays;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -21,16 +17,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class InventoryTests {
+public class IngredientTests {
 
   @LocalServerPort
   private int port;
@@ -42,30 +36,28 @@ public class InventoryTests {
   private RegisteringUtils registeringUtils;
 
   @Autowired
-  private final IngredientRepository ingredientRepository;
+  private IngredientRepository ingredientRepository;
 
-  @Autowired
   private final Gson gson = new Gson();
+
+  private String myURL() {
+    return "http://localhost:" + port;
+  }
+
 
   @Lazy
   @TestConfiguration
-  static class InventoryTestConfiguration {
+  static class CustomerAccountsTestConfiguration {
     @Bean
     public RegisteringUtils registeringUtils(@Value("${local.server.port}") int port, @Autowired TestRestTemplate restTemplate) {
       return new RegisteringUtils(port, restTemplate);
     }
   }
 
-
-  private String myURL() {
-    return "http://localhost:" + port;
-  }
-    
   @Test
   public void testGetAllIngredients() {
-    Account account = new Account("getAllIngredients", "testLogout@usu.edu", "mySecretPassword", "John", "Doe");
+    Account account = new Account("getAllIngredients", "testGetAllIngredients@usu.edu", "mySecretPassword", "John", "Doe");
     ResponseEntity<AuthenticationResponse> responseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
-
     Ingredient[] ingredientsToSave = {new Ingredient("test1", 10), new Ingredient("test2", 10), new Ingredient("test3", 10)};
     ingredientRepository.saveAll(Arrays.asList(ingredientsToSave));
 
@@ -83,10 +75,13 @@ public class InventoryTests {
     ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
 
     Ingredient[] ingredientResponse = gson.fromJson(response.getBody(), Ingredient[].class);
-    Ingredient[] ingredientsFromDb = (Ingredient[]) ingredientRepository.findAll().toArray();
+    Ingredient[] ingredientsFromDb = new Ingredient[ingredientRepository.findAll().size()];
+    ingredientRepository.findAll().toArray(ingredientsFromDb);
 
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertArrayEquals(ingredientResponse, ingredientsFromDb);
-    System.out.println(response.getBody() + " has expected status " + HttpStatus.OK);
+    System.out.println(response.getBody());
   }
+
+
 }

@@ -7,7 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @SelectPackages({"com.sodasensaitions.backend.utils",
-    "com.sodasensaitions.backend.accounttests"
+    "com.sodasensaitions.backend.accounttests",
+    "com.sodasensaitions.backend.ingredienttests",
 })
 @Suite
 class BackendApplicationTests {
