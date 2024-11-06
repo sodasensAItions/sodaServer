@@ -80,7 +80,6 @@ public class IngredientTests {
 
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertArrayEquals(ingredientResponse, ingredientsFromDb);
-    System.out.println(response.getBody());
   }
 
 
