@@ -1,7 +1,6 @@
 package com.sodasensaitions.backend.paymenttests;
 
 import com.sodasensaitions.backend.authentication.user.Account;
-import com.sodasensaitions.backend.authentication.user.AccountRepository;
 import com.sodasensaitions.backend.payment.PaymentPOJO;
 import com.sodasensaitions.backend.utils.RegisteringUtils;
 import org.junit.Assert;
