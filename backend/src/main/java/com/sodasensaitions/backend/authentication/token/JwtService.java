@@ -1,4 +1,4 @@
-package com.sodasensaitions.backend.authentication.config;
+package com.sodasensaitions.backend.authentication.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -77,6 +77,11 @@ public class JwtService {
   private boolean isTokenExpired(String token) {
 
     Date date = extractExpiration(token);
+
+    if(date == null) {
+      return true;
+    }
+
     return date.before(new Date());
   }
 
