@@ -25,6 +25,9 @@ public class Ingredient {
     public String name;
 
     @Column
+    public int ingredientId;
+
+    @Column
     public int quantity;
 
     public Ingredient(String name, int quantity) {

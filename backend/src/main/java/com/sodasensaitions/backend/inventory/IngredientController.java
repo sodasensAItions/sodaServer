@@ -17,6 +17,11 @@ public class IngredientController {
 
     @GetMapping("/all")
     public ResponseEntity<List<Ingredient>> getAll() {
-        return ResponseEntity.ok(ingredientService.getAllAvailable());
+        return ResponseEntity.ok(ingredientService.getAllIngredients());
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<Ingredient>> getAvailable() {
+        return ResponseEntity.ok(ingredientService.getAvailableIngredients());
     }
 }
