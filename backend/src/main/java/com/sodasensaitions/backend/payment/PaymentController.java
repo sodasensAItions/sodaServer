@@ -1,13 +1,19 @@
 package com.sodasensaitions.backend.payment;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.PostConstruct;
 
@@ -15,48 +21,48 @@ import jakarta.annotation.PostConstruct;
 @RequestMapping("/payments")
 public class PaymentController {
 
-  // Inject the Stripe API key from application.properties
   @Value("${stripe.apiKey}")
   private String stripeApiKey;
 
-  // Initialize Stripe API key once when the controller is created
   @PostConstruct
   public void init() {
     Stripe.apiKey = stripeApiKey;
   }
 
   @PostMapping("/create-payment-intent")
-  public ResponseEntity<String> createPaymentIntent(@RequestBody PaymentPOJO data) {
-
+  public ResponseEntity<Map<String, String>> createPaymentIntent(@RequestBody PaymentPOJO data) {
     try {
-      // Retrieve amount and currency from the request body
       long amount = data.getAmount();
       String currency = data.getCurrency();
 
       if (currency == null) {
-        return ResponseEntity.badRequest().body("Amount and currency are required.");
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Amount and currency are required.");
+        return ResponseEntity.badRequest().body(errorResponse);
       }
 
-      // Ensure amount is a positive value
       if (amount <= 0) {
-        return ResponseEntity.badRequest().body("Amount must be greater than zero.");
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Amount must be greater than zero.");
+        return ResponseEntity.badRequest().body(errorResponse);
       }
 
-      // Create PaymentIntent parameters
       PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
           .setAmount(amount)
           .setCurrency(currency)
           .build();
 
-      // Create a PaymentIntent with Stripe
       PaymentIntent intent = PaymentIntent.create(params);
 
-      // Return the client secret to the client
-      return ResponseEntity.ok(intent.getClientSecret());
+      // Return client secret in a JSON response
+      Map<String, String> responseData = new HashMap<>();
+      responseData.put("clientSecret", intent.getClientSecret());
+      return ResponseEntity.ok(responseData);
 
     } catch (StripeException e) {
-      // Handle Stripe API errors
-      return ResponseEntity.badRequest().build();
+      Map<String, String> errorResponse = new HashMap<>();
+      errorResponse.put("error", "Failed to create payment intent.");
+      return ResponseEntity.badRequest().body(errorResponse);
     }
   }
 }
