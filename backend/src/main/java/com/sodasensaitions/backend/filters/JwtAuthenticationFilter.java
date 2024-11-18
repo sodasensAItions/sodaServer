@@ -37,6 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
       return;
     }
+
+    // Skip the filter for authentication paths and payments endpoints
+    if (request.getServletPath().contains(HttpServletSessionConstants.AUTHENTICATION_PATH) ||
+        request.getServletPath().startsWith("/payments")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     final String authHeader = request.getHeader("Authorization");
     final String jwt;
     final String username;

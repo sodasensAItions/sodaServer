@@ -35,6 +35,7 @@ public class SecurityConfiguration {
             .requestMatchers(HttpServletSessionConstants.AUTHENTICATION_PATH + "/*").permitAll()
             .requestMatchers("/test/public").permitAll()
             .requestMatchers("/test/unreachable").authenticated()
+            .requestMatchers("/payments/**").permitAll()
             .anyRequest().authenticated() // all other requests require authentication
         ).cors(AbstractHttpConfigurer::disable);
     http
