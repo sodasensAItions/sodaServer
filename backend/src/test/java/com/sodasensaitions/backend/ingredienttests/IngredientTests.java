@@ -58,7 +58,7 @@ public class IngredientTests {
   public void testGetAllIngredients() {
     Account account = new Account("getAllIngredients", "testGetAllIngredients@usu.edu", "mySecretPassword", "John", "Doe");
     ResponseEntity<AuthenticationResponse> responseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
-    Ingredient[] ingredientsToSave = {new Ingredient("test1", 10), new Ingredient("test2", 10), new Ingredient("test3", 10)};
+    Ingredient[] ingredientsToSave = {new Ingredient("test1", 10, 0, true), new Ingredient("test2", 10, 1, true), new Ingredient("test3", 10, 2, false)};
     ingredientRepository.saveAll(Arrays.asList(ingredientsToSave));
 
     //Verify that all the ingredients are returned from the database
