@@ -25,10 +25,18 @@ public class Ingredient {
     public String name;
 
     @Column
+    public int ingredientId;
+
+    @Column
+    public boolean isBase;
+
+    @Column
     public int quantity;
 
-    public Ingredient(String name, int quantity) {
+    public Ingredient(String name, int quantity, int ingredientId, boolean isBase) {
         this.name = name;
         this.quantity = quantity;
+        this.ingredientId = ingredientId;
+        this.isBase = isBase;
     }
 }
