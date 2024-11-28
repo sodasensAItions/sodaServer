@@ -36,7 +36,7 @@ public class AuthenticationController {
   ) {
     AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
     if (authenticationResponse == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     return ResponseEntity.ok(authenticationResponse);
   }
