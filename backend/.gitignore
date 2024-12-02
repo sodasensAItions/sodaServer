@@ -38,3 +38,5 @@ out/
 
 ### SQLite
 *.sqlite
+
+BackendApplicationTests.java

@@ -1,20 +1,19 @@
 package com.sodasensaitions.backend.authentication.user;
 
-import com.google.gson.JsonObject;
 import com.sodasensaitions.backend.authentication.token.Token;
 import com.sodasensaitions.backend.converter.database.LocalDateTimeConverter;
+import com.sodasensaitions.backend.orders.pojo.SodaOrder;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -50,25 +49,25 @@ public class Account implements UserDetails {
   @CreationTimestamp
   private LocalDateTime created;
 
+  @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
+  private List<SodaOrder> sodaOrders;
+
   public Account(String username, String email, String password, String firstName, String lastName) {
     this.username = username;
     this.email = email;
     this.password = password;
     this.firstName = firstName;
     this.lastName = lastName;
+    sodaOrders = new ArrayList<>();
   }
 
-  public JsonObject getAsJsonObject() {
-    JsonObject json = new JsonObject();
-    json.addProperty("id", id);
-    json.addProperty("username", username);
-    json.addProperty("email", email);
-    json.addProperty("firstName", firstName);
-    json.addProperty("lastName", lastName);
-
-    return json;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Account account = (Account) o;
+    return Objects.equals(id, account.id) && Objects.equals(username, account.username) && Objects.equals(email, account.email);
   }
-
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -104,4 +103,9 @@ public class Account implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
+  public void addOrder(SodaOrder sodaOrder) {
+    sodaOrders.add(sodaOrder);
+  }
+
 }

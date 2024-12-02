@@ -131,4 +131,30 @@ public class AccountTests {
       registeringUtils.testReachSecuredEndpoint(authenticationResponse, HttpStatus.OK);
     }
   }
+
+  @Test
+  public void testTwoAccountsDifferentPasswordsInDatabase() {
+    Account account1 = new Account("testTwoAccountsDifferentPasswordsInDatabase1", "testTwoAccountsDifferentPasswordsInDatabase1@usu.edu", "mySecretPassword", "John", "Doe");
+    Account account2 = new Account("testTwoAccountsDifferentPasswordsInDatabase2", "testTwoAccountsDifferentPasswordsInDatabase2@usu.edu", "mySecretPassword", "John", "Doe");
+
+    registeringUtils.tryRegistering(account1, HttpStatus.OK);
+    registeringUtils.tryRegistering(account2, HttpStatus.OK);
+
+    //verify that the passwords have different hashes
+
+    accountRepository.findByUsername(account1.getUsername()).ifPresentOrElse(
+      user1 -> accountRepository.findByUsername(account2.getUsername()).ifPresentOrElse(
+        user2 -> {
+          assert !user1.getPassword().equals(user2.getPassword());
+        },
+        () -> {
+          assert false;
+        }
+      ),
+      () -> {
+        assert false;
+      }
+    );
+
+  }
 }
