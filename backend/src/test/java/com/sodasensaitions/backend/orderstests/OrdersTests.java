@@ -347,6 +347,36 @@ public class OrdersTests {
   }
 
   @Test
+  public void testCreateOrderWithOutOfStockFlavor() {
+    Account account = new Account("testCreateOrderWithOutOfStockFlavor", "test", "password", "testCreateOrderWithOutOfStockFlavor", "testCreateOrderWithOutOfStockFlavor");
+    ResponseEntity<AuthenticationResponse> authenticationResponseResponseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
+
+    ArrayList<Drink> drinks = generateRandomDrinks(1);
+
+    // set the quantity of the first flavor ingredient to 0 so that the order will have an out-of-stock element
+    var flavorIngredient = drinks.getFirst().getFlavors().getFirst();
+    Optional<Ingredient> ingredientOptional = ingredientRepository.findById(flavorIngredient.getId());
+
+    if (ingredientOptional.isEmpty()) {
+      Assert.fail("Flavor ingredient not found");
+    }
+
+    Ingredient ingredient = ingredientOptional.get();
+    int quantity = ingredient.getQuantity();
+    Assert.assertTrue(quantity > 0);
+    ingredient.setQuantity(0);
+    ingredientRepository.save(ingredient);
+
+    SodaOrder sodaOrder = new SodaOrder(drinks);
+    AuthenticationResponse authenticationResponse = authenticationResponseResponseEntity.getBody();
+
+    assert authenticationResponse != null;
+    tryCreatingOrder(authenticationResponse, sodaOrder, HttpStatus.BAD_REQUEST);
+
+    ingredient.setQuantity(quantity);
+  }
+
+  @Test
   public void testIsQuantityReduced(){
     Account account = new Account("testIsQuantityReduced", "testIsQuantityReduced@usu.edu", "password", "testIsQuantityReduced", "testIsQuantityReduced");
     ResponseEntity<AuthenticationResponse> authenticationResponseResponseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
@@ -538,6 +568,23 @@ public class OrdersTests {
     System.out.println(orderHistory);
   }
 
+  @Test
+  public void testSaveDrinkToFavorites() {
+    Account account = new Account("testSaveDrinkToFavorites", "testSaveDrinkToFavorites@usu.edu", "password", "testSaveDrinkToFavorites", "testSaveDrinkToFavorites");
+    ResponseEntity<AuthenticationResponse> authenticationResponseResponseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
+
+    ArrayList<Drink> drinks = generateRandomDrinks(1);
+    SodaOrder sodaOrder = new SodaOrder(drinks);
+    AuthenticationResponse authenticationResponse = authenticationResponseResponseEntity.getBody();
+    assert authenticationResponse != null;
+
+    trySaveDrinkToFavorites(authenticationResponse, sodaOrder, HttpStatus.OK);
+
+    Account accountFromDB = accountRepository.findByUsername(account.getUsername()).orElseThrow();
+    Assert.assertEquals(1, accountFromDB.getSavedDrinks().size());
+  }
+
+
   private Integer tryCreatingOrder(AuthenticationResponse authenticationResponse, SodaOrder sodaOrder, HttpStatus expectedStatus) {
     String url = myURL() + "/orders/create";
     String orderJson = orderToJson(sodaOrder);
@@ -646,6 +693,20 @@ public class OrdersTests {
 
     Assert.assertEquals(expectedStatus, response.getStatusCode());
     return response.getBody();
+  }
+
+  private void trySaveDrinkToFavorites(AuthenticationResponse authenticationResponse, SodaOrder sodaOrder, HttpStatus expectedStatus) {
+    String url = myURL() + "/orders/save";
+    String savedDrinksJson = orderToJson(sodaOrder);
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setBearerAuth(authenticationResponse.getAccessToken());
+    HttpEntity<String> httpEntity = new HttpEntity<>(savedDrinksJson, httpHeaders);
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+    ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+
+    Assert.assertEquals(expectedStatus, response.getStatusCode());
   }
 
 }

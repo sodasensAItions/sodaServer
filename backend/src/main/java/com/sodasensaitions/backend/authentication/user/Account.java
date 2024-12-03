@@ -2,6 +2,7 @@ package com.sodasensaitions.backend.authentication.user;
 
 import com.sodasensaitions.backend.authentication.token.Token;
 import com.sodasensaitions.backend.converter.database.LocalDateTimeConverter;
+import com.sodasensaitions.backend.orders.pojo.Drink;
 import com.sodasensaitions.backend.orders.pojo.SodaOrder;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,6 +53,9 @@ public class Account implements UserDetails {
   @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
   private List<SodaOrder> sodaOrders;
 
+  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private List<Drink> savedDrinks;
+
   public Account(String username, String email, String password, String firstName, String lastName) {
     this.username = username;
     this.email = email;
@@ -59,6 +63,7 @@ public class Account implements UserDetails {
     this.firstName = firstName;
     this.lastName = lastName;
     sodaOrders = new ArrayList<>();
+    savedDrinks = new ArrayList<>();
   }
 
   @Override

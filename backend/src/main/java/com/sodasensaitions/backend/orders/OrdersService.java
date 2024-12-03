@@ -3,12 +3,14 @@ package com.sodasensaitions.backend.orders;
 import com.sodasensaitions.backend.authentication.user.Account;
 import com.sodasensaitions.backend.authentication.user.AccountRepository;
 import com.sodasensaitions.backend.inventory.IngredientService;
+import com.sodasensaitions.backend.orders.pojo.Drink;
 import com.sodasensaitions.backend.orders.pojo.DrinkRepository;
 import com.sodasensaitions.backend.orders.pojo.SodaOrder;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,6 +62,14 @@ public class OrdersService {
 
     ordersRepository.save(sodaOrder);
     return true;
+  }
+
+  public void saveDrinkToFavorites(Account account, List<Drink> savedDrinks){
+    account.getSavedDrinks().addAll(savedDrinks);
+    for (Drink drink : savedDrinks) {
+      drink.getSavedBy().add(account);
+    }
+    accountRepository.save(account);
   }
 
   public Optional<SodaOrder> getOrder(Integer orderID) {

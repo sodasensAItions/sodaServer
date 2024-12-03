@@ -120,6 +120,44 @@ public class OrdersController {
     return sodaOrderOptional.map(sodaOrder -> ResponseEntity.ok(sodaOrderToJson(sodaOrder).toString())).orElseGet(() -> ResponseEntity.badRequest().build());
   }
 
+  @PostMapping("/save")
+  public ResponseEntity<Void> saveDrink(@RequestBody String tmp, @NonNull HttpServletRequest request) {
+    String username = (String) request.getSession().getAttribute(HttpServletSessionConstants.PRINCIPAL);
+    Optional<Account> usernameOptional = accountRepository.findByUsername(username);
+    if (usernameOptional.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+    Account account = usernameOptional.get();
+
+    JsonArray root;
+    try {
+      root = gson.fromJson(tmp, JsonArray.class);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    SodaOrder sodaOrder = sodaOrderFromJson(root);
+    if(sodaOrder == null) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    if(sodaOrder.getDrinks().isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    // check if any flavor ingredient has more than 10 pumps
+    for(Drink drink : sodaOrder.getDrinks()) {
+      for(var flavor : drink.getFlavors()) {
+        if(flavor.getQuantity() > 10 || flavor.getQuantity() < 1) {
+          return ResponseEntity.badRequest().build();
+        }
+      }
+    }
+
+    ordersService.saveDrinkToFavorites(account, sodaOrder.getDrinks());
+    return ResponseEntity.ok().build();
+  }
+
 
   private SodaOrder sodaOrderFromJson(JsonArray root) {
     ArrayList<Drink> drinks = new ArrayList<>();
