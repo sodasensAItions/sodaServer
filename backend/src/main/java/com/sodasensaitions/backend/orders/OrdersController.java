@@ -41,30 +41,10 @@ public class OrdersController {
       return ResponseEntity.badRequest().build();
     }
 
-    // Parse the request body into a JsonArray
-    JsonArray root;
-    try {
-      root = gson.fromJson(tmp, JsonArray.class);
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    SodaOrder sodaOrder = sodaOrderFromJson(root);
+    // Parse the soda order from the JSON string
+    SodaOrder sodaOrder = sodaOrderFromJsonIncludingChecks(tmp);
     if(sodaOrder == null) {
       return ResponseEntity.badRequest().build();
-    }
-
-    if(sodaOrder.getDrinks().isEmpty()) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    // check if any flavor ingredient has more than 10 pumps
-    for(Drink drink : sodaOrder.getDrinks()) {
-      for(var flavor : drink.getFlavors()) {
-        if(flavor.getQuantity() > 10 || flavor.getQuantity() < 1) {
-          return ResponseEntity.badRequest().build();
-        }
-      }
     }
 
 
@@ -129,33 +109,42 @@ public class OrdersController {
     }
     Account account = usernameOptional.get();
 
-    JsonArray root;
-    try {
-      root = gson.fromJson(tmp, JsonArray.class);
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    SodaOrder sodaOrder = sodaOrderFromJson(root);
+    SodaOrder sodaOrder = sodaOrderFromJsonIncludingChecks(tmp);
     if(sodaOrder == null) {
       return ResponseEntity.badRequest().build();
     }
 
+    ordersService.saveDrinkToFavorites(account, sodaOrder.getDrinks());
+    return ResponseEntity.ok().build();
+  }
+
+  private SodaOrder sodaOrderFromJsonIncludingChecks(String tmp) {
+    JsonArray root;
+    try {
+      root = gson.fromJson(tmp, JsonArray.class);
+    } catch (Exception e) {
+      return null;
+    }
+
+    SodaOrder sodaOrder = sodaOrderFromJson(root);
+    if(sodaOrder == null) {
+      return null;
+    }
+
     if(sodaOrder.getDrinks().isEmpty()) {
-      return ResponseEntity.badRequest().build();
+      return null;
     }
 
     // check if any flavor ingredient has more than 10 pumps
     for(Drink drink : sodaOrder.getDrinks()) {
       for(var flavor : drink.getFlavors()) {
         if(flavor.getQuantity() > 10 || flavor.getQuantity() < 1) {
-          return ResponseEntity.badRequest().build();
+          return null;
         }
       }
     }
 
-    ordersService.saveDrinkToFavorites(account, sodaOrder.getDrinks());
-    return ResponseEntity.ok().build();
+    return sodaOrder;
   }
 
 
