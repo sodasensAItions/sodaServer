@@ -604,6 +604,55 @@ public class OrdersTests {
     Assert.assertEquals(expectedSize, jsonArray.size());
   }
 
+  @Test
+  public void testGetOpenOrders(){
+    Account account = new Account("testGetOpenOrders", "testGetOpenOrders@usu.edu", "password", "testGetOpenOrders", "testGetOpenOrders");
+    ResponseEntity<AuthenticationResponse> authenticationResponseResponseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
+
+    int howMany = 10;
+    for(int i = 0; i < howMany; i++){
+      ArrayList<Drink> drinks = generateRandomDrinks(1);
+      SodaOrder sodaOrder = new SodaOrder(drinks);
+      AuthenticationResponse authenticationResponse = authenticationResponseResponseEntity.getBody();
+      assert authenticationResponse != null;
+      Integer newOrderID = tryCreatingOrder(authenticationResponse, sodaOrder, HttpStatus.OK);
+      Assert.assertNotNull(newOrderID);
+    }
+
+    String openOrders = tryGettingOpenOrders(authenticationResponseResponseEntity.getBody(), HttpStatus.OK);
+    System.out.println(openOrders);
+
+    JsonArray jsonArray = gson.fromJson(openOrders, JsonArray.class);
+    Assert.assertEquals(howMany, jsonArray.size());
+  }
+
+  @Test
+  public void testGetOpenOrdersNoneAvailable(){
+    Account account = new Account("testGetOpenOrdersNoneAvailable", "testGetOpenOrdersNoneAvailable@usu.edu", "password", "testGetOpenOrdersNoneAvailable", "testGetOpenOrdersNoneAvailable");
+    ResponseEntity<AuthenticationResponse> authenticationResponseResponseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
+
+    AuthenticationResponse body = authenticationResponseResponseEntity.getBody();
+    assert body != null;
+    String openOrders = tryGettingOpenOrders(body, HttpStatus.OK);
+    System.out.println(openOrders);
+
+    JsonArray jsonArray = gson.fromJson(openOrders, JsonArray.class);
+    Assert.assertEquals(0, jsonArray.size());
+  }
+
+  private String tryGettingOpenOrders(AuthenticationResponse body, HttpStatus httpStatus) {
+    String url = myURL() + "/orders/getopenorders";
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setBearerAuth(body.getAccessToken());
+    HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+
+    ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+
+    Assert.assertEquals(httpStatus, response.getStatusCode());
+    return response.getBody();
+  }
+
 
   private Integer tryCreatingOrder(AuthenticationResponse authenticationResponse, SodaOrder sodaOrder, HttpStatus expectedStatus) {
     String url = myURL() + "/orders/create";

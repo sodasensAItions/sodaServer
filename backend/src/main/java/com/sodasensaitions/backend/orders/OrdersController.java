@@ -59,6 +59,21 @@ public class OrdersController {
     return ResponseEntity.ok(savedSodaOrder.getId());
   }
 
+  @GetMapping("/getopenorders")
+  public ResponseEntity<String> getOpenOrders(@NonNull HttpServletRequest request) {
+    // Find the user who is making the order
+    String username = (String) request.getSession().getAttribute(HttpServletSessionConstants.PRINCIPAL);
+    Optional<Account> usernameOptional = accountRepository.findByUsername(username);
+    if (usernameOptional.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    // Get the user's open orders
+    Account account = usernameOptional.get();
+    JsonArray jsonArray = sodaOrdersToJson(account.getSodaOrders().stream().filter(sodaOrder -> !sodaOrder.isCompleted())::iterator);
+    return ResponseEntity.ok(jsonArray.toString());
+  }
+
   @PostMapping("here/{orderID}")
   public ResponseEntity<String> iamhere(@PathVariable("orderID") Integer orderID, @NonNull HttpServletRequest request){
     //verify that this is my order
