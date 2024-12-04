@@ -83,6 +83,7 @@ public class IngredientTests {
 
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertArrayEquals(ingredientResponse, ingredientsFromDb);
+    System.out.println("Ingredients: " + Arrays.toString(ingredientResponse));
   }
 
   @Test
@@ -108,14 +109,15 @@ public class IngredientTests {
 
     Ingredient[] ingredientResponse = gson.fromJson(response.getBody(), Ingredient[].class);
     Optional<List<Ingredient>> ingredientsOptional = ingredientRepository.findByQuantityGreaterThan(0);
-    List<Ingredient> ingredientsFromDb = new ArrayList<Ingredient>();
+    List<Ingredient> ingredientsFromDb = new ArrayList<>();
 
     if (ingredientsOptional.isPresent()) {
         ingredientsFromDb = ingredientsOptional.get();
     }
 
     Assert.assertArrayEquals(ingredientsFromDb.toArray(), new ArrayList<Ingredient>().toArray());
-
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+    System.out.println("Ingredients: " + Arrays.toString(ingredientResponse));
   }
 
   @Test
@@ -140,7 +142,7 @@ public class IngredientTests {
     ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
     Ingredient[] ingredientResponse = gson.fromJson(response.getBody(), Ingredient[].class);
     Optional<List<Ingredient>> ingredientsOptional = ingredientRepository.findByQuantityGreaterThan(0);
-    List<Ingredient> ingredientsFromDb = new ArrayList<Ingredient>();
+    List<Ingredient> ingredientsFromDb = new ArrayList<>();
 
     if (ingredientsOptional.isPresent()) {
         ingredientsFromDb = ingredientsOptional.get();
@@ -148,6 +150,7 @@ public class IngredientTests {
 
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertArrayEquals(ingredientResponse, ingredientsFromDb.toArray());
+    System.out.println("Ingredients: " + Arrays.toString(ingredientResponse));
   }
 
 
