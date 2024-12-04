@@ -118,6 +118,19 @@ public class OrdersController {
     return ResponseEntity.ok().build();
   }
 
+  @GetMapping("/favorites")
+  public ResponseEntity<String> getFavorites(@NonNull HttpServletRequest request) {
+    String username = (String) request.getSession().getAttribute(HttpServletSessionConstants.PRINCIPAL);
+    Optional<Account> usernameOptional = accountRepository.findByUsername(username);
+    if (usernameOptional.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+    Account account = usernameOptional.get();
+
+    JsonArray jsonArray = drinksToJson(account.getSavedDrinks());
+    return ResponseEntity.ok(jsonArray.toString());
+  }
+
   private SodaOrder sodaOrderFromJsonIncludingChecks(String tmp) {
     JsonArray root;
     try {

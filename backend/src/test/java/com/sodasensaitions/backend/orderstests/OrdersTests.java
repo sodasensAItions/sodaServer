@@ -584,6 +584,26 @@ public class OrdersTests {
     Assert.assertEquals(1, accountFromDB.getSavedDrinks().size());
   }
 
+  @Test
+  public void testGetSavedDrinks() {
+    Account account = new Account("testGetSavedDrinks", "testGetSavedDrinks@usu.edu", "password", "testGetSavedDrinks", "testGetSavedDrinks");
+    ResponseEntity<AuthenticationResponse> authenticationResponseResponseEntity = registeringUtils.tryRegistering(account, HttpStatus.OK);
+
+    int expectedSize = 6;
+
+    ArrayList<Drink> drinks = generateRandomDrinks(expectedSize);
+    SodaOrder sodaOrder = new SodaOrder(drinks);
+    AuthenticationResponse authenticationResponse = authenticationResponseResponseEntity.getBody();
+    assert authenticationResponse != null;
+
+    trySaveDrinkToFavorites(authenticationResponse, sodaOrder, HttpStatus.OK);
+
+    String savedDrinks = tryGettingSavedDrinks(authenticationResponse, HttpStatus.OK);
+
+    JsonArray jsonArray = gson.fromJson(savedDrinks, JsonArray.class);
+    Assert.assertEquals(expectedSize, jsonArray.size());
+  }
+
 
   private Integer tryCreatingOrder(AuthenticationResponse authenticationResponse, SodaOrder sodaOrder, HttpStatus expectedStatus) {
     String url = myURL() + "/orders/create";
@@ -707,6 +727,19 @@ public class OrdersTests {
     ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 
     Assert.assertEquals(expectedStatus, response.getStatusCode());
+  }
+
+  private String tryGettingSavedDrinks(AuthenticationResponse authenticationResponse, HttpStatus expectedStatus) {
+    String url = myURL() + "/orders/favorites";
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setBearerAuth(authenticationResponse.getAccessToken());
+    HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+
+    ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+
+    Assert.assertEquals(expectedStatus, response.getStatusCode());
+    return response.getBody();
   }
 
 }
